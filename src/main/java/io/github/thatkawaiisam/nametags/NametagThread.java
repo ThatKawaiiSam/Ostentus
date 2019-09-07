@@ -1,40 +1,105 @@
 package io.github.thatkawaiisam.nametags;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import org.bukkit.scoreboard.DisplaySlot;
+import org.bukkit.scoreboard.Objective;
+import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.Team;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class NametagThread extends Thread {
 
     private NametagHandler handler;
-    private int interval;
 
-    public NametagThread(NametagHandler handler, int interval) {
-        setName("Nametag-Library");
+    public NametagThread(NametagHandler handler) {
         this.handler = handler;
-        this.interval = interval;
+        this.start();
     }
 
     @Override
     public void run() {
         while (true) {
             try {
-                Bukkit.getOnlinePlayers().forEach(localPlayer -> {
-                    if (localPlayer != null && localPlayer.isOnline()) {
-                        handler.update(localPlayer);
-                    }
-                });
+                tick();
             } catch(NullPointerException e) {
                 e.printStackTrace();
             }
             try {
-                //TODO make this configurable
-                //TODO do a hook mode
-                //TODO fix nullpointer
-                sleep(50 * interval);
+                sleep(50 * handler.getTicks());
             } catch (InterruptedException e) {
                 e.printStackTrace();
+            }
+        }
+    }
+
+    private void tick() {
+        if (this.handler.getAdapter() == null) {
+            return;
+        }
+
+        for (Player player : this.handler.getPlugin().getServer().getOnlinePlayers()) {
+            NametagBoard board = this.handler.getBoards().get(player.getUniqueId());
+
+            // This shouldn't happen, but just in case
+            if (board == null) {
+                continue;
+            }
+
+            Scoreboard scoreboard = board.getScoreboard();
+            List<BufferedNametag> nametags = this.handler.getAdapter().getPlate(player);
+
+            if (nametags == null) {
+                continue;
+            }
+
+            for (BufferedNametag bufferedNametag : nametags) {
+                //Get Team
+                Team team = scoreboard.getTeam(bufferedNametag.getGroupName());
+
+                if (team == null) {
+                    team = scoreboard.registerNewTeam(bufferedNametag.getGroupName());
+                }
+
+                //Set Prefix
+                if (bufferedNametag.getPrefix() != null) {
+                    team.setPrefix(bufferedNametag.getPrefix());
+                } else {
+                    team.setPrefix(ChatColor.WHITE.toString());
+                }
+                //Set Suffix
+                if (bufferedNametag.getSuffix() != null) {
+                    team.setSuffix(bufferedNametag.getSuffix());
+                } else {
+                    team.setSuffix(ChatColor.WHITE.toString());
+                }
+                if (bufferedNametag.getPlayer() != null && bufferedNametag.getPlayer().isOnline()) {
+                    team.addEntry(bufferedNametag.getPlayer().getName());
+                }
+
+                //Friendly Invis
+                team.setCanSeeFriendlyInvisibles(bufferedNametag.isFriendlyInvis());
+
+                if (bufferedNametag.isShowHealth() && scoreboard.getObjective(DisplaySlot.BELOW_NAME) == null) {
+                    Objective objective = scoreboard.registerNewObjective("showhealth", "health");
+                    objective.setDisplaySlot(DisplaySlot.BELOW_NAME);
+                    objective.setDisplayName(ChatColor.RED + StringEscapeUtils.unescapeJava("\u2764"));
+                    objective.getScore(bufferedNametag.getPlayer()).setScore((int) Math.floor(bufferedNametag.getPlayer().getHealth()));
+                }
+
+                if (!bufferedNametag.isShowHealth() && scoreboard.getObjective(DisplaySlot.BELOW_NAME) != null) {
+                    Objective objective = scoreboard.getObjective(DisplaySlot.BELOW_NAME);
+                    objective.unregister();
+                }
+
+                if (bufferedNametag.isShowHealth() && scoreboard.getObjective(DisplaySlot.BELOW_NAME) != null) {
+                    Objective objective = scoreboard.getObjective("showhealth");
+                    objective.getScore(bufferedNametag.getPlayer()).setScore((int) Math.floor(bufferedNametag.getPlayer().getHealth()));
+                }
             }
         }
     }

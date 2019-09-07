@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
@@ -13,78 +14,74 @@ import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Getter @Setter
 public class NametagHandler {
 
-    private NametagAdapter adapter;
     private JavaPlugin plugin;
+    private NametagAdapter adapter;
+    private Map<UUID, NametagBoard> boards;
     private NametagThread thread;
+    private NametagListeners listeners;
+    private long ticks = 2;
+    private boolean hook = false;
 
-    public NametagHandler(JavaPlugin plugin) {
-        this.plugin = plugin;
-        thread = new NametagThread(this, 10);
-        thread.start();
-    }
 
     public NametagHandler(JavaPlugin plugin, NametagAdapter adapter) {
-        this(plugin);
+        if (plugin == null) {
+            throw new RuntimeException("Nametag Handler can not be instantiated without a plugin instance!");
+        }
+
+        this.plugin = plugin;
         this.adapter = adapter;
+        this.boards = new ConcurrentHashMap<>();
+
+        this.setup();
+    }
+
+    public void setup() {
+        //Register Events
+        this.listeners = new NametagListeners(this);
+        this.plugin.getServer().getPluginManager().registerEvents(this.listeners, this.plugin);
+
+        // Ensure that the thread has stopped running
+        if (this.thread != null) {
+            this.thread.stop();
+            this.thread = null;
+        }
+
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            //Call Event
+            getBoards().putIfAbsent(player.getUniqueId(), new NametagBoard(player, this));
+        }
+
+        this.thread = new NametagThread(this);
     }
 
     public void cleanup() {
-        thread.stop();
-    }
-
-    public void update(Player player) {
-        if (adapter == null) {
-            return;
-        }
-        List<BufferedNametag> nametags = adapter.getPlate(player);
-        Scoreboard sb = player.getScoreboard();
-
-        if (sb == Bukkit.getScoreboardManager().getMainScoreboard()) {
-            return;
+        if (this.thread != null) {
+            this.thread.stop();
+            this.thread = null;
         }
 
-        for (BufferedNametag bufferedNametag : nametags) {
-            //Get Team
-            Team team = sb.getTeam(bufferedNametag.getGroupName());
+        if (this.listeners != null) {
+            HandlerList.unregisterAll(this.listeners);
+            this.listeners = null;
+        }
 
-            if (team == null) {
-                team = sb.registerNewTeam(bufferedNametag.getGroupName());
-            }
+        for (UUID uuid : getBoards().keySet()) {
+            Player player = Bukkit.getPlayer(uuid);
 
-            //Set Prefix
-            if (bufferedNametag.getPrefix() != null) {
-                team.setPrefix(bufferedNametag.getPrefix());
-            } else {
-                team.setPrefix(ChatColor.WHITE.toString());
-            }
-            //Set Suffix
-            if (bufferedNametag.getSuffix() != null) {
-                team.setSuffix(bufferedNametag.getSuffix());
-            } else {
-                team.setSuffix(ChatColor.WHITE.toString());
-            }
-            if (bufferedNametag.getPlayer() != null && bufferedNametag.getPlayer().isOnline()) {
-                team.addEntry(bufferedNametag.getPlayer().getName());
+            if (player == null || !player.isOnline()) {
+                continue;
             }
 
-            //Friendly Invis
-            team.setCanSeeFriendlyInvisibles(bufferedNametag.isFriendlyInvis());
-
-            if (bufferedNametag.isShowHealth() && sb.getObjective(DisplaySlot.BELOW_NAME) == null) {
-                Objective objective = sb.registerNewObjective("showhealth", "health");
-                objective.setDisplaySlot(DisplaySlot.BELOW_NAME);
-                objective.setDisplayName(ChatColor.RED + StringEscapeUtils.unescapeJava("\u2764"));
-                objective.getScore(bufferedNametag.getPlayer()).setScore((int) Math.floor(bufferedNametag.getPlayer().getHealth()));
-            }
-
-            if (!bufferedNametag.isShowHealth() && sb.getObjective(DisplaySlot.BELOW_NAME) != null) {
-                Objective objective = sb.getObjective(DisplaySlot.BELOW_NAME);
-                objective.unregister();
-            }
+            getBoards().remove(uuid);
+            player.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
         }
     }
+
 }
