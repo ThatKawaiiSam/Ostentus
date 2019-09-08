@@ -15,6 +15,7 @@ public class NametagBoard {
     private Set<BufferedNametag> currentEntries = new HashSet<>();
     private final UUID uuid;
     private Scoreboard scoreboard;
+    private Set<String> bufferedTeams = new HashSet<>();
 
     private NametagHandler handler;
 

@@ -9,7 +9,9 @@ import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 public class NametagThread extends Thread {
@@ -57,6 +59,10 @@ public class NametagThread extends Thread {
                 continue;
             }
 
+            Set<String> toReturn = new HashSet<>();
+
+            boolean isHealth = false;
+
             for (BufferedNametag bufferedNametag : nametags) {
                 //Get Team
                 Team team = scoreboard.getTeam(bufferedNametag.getGroupName());
@@ -64,6 +70,9 @@ public class NametagThread extends Thread {
                 if (team == null) {
                     team = scoreboard.registerNewTeam(bufferedNametag.getGroupName());
                 }
+
+                toReturn.add(team.getName());
+                board.getBufferedTeams().remove(team.getName());
 
                 //Set Prefix
                 if (bufferedNametag.getPrefix() != null) {
@@ -85,10 +94,11 @@ public class NametagThread extends Thread {
                 team.setCanSeeFriendlyInvisibles(bufferedNametag.isFriendlyInvis());
 
                 if (bufferedNametag.isShowHealth() && scoreboard.getObjective(DisplaySlot.BELOW_NAME) == null) {
-                    Objective objective = scoreboard.registerNewObjective("showhealth", "health");
+                    Objective objective = scoreboard.registerNewObjective(bufferedNametag.getGroupName(), "health");
                     objective.setDisplaySlot(DisplaySlot.BELOW_NAME);
                     objective.setDisplayName(ChatColor.RED + StringEscapeUtils.unescapeJava("\u2764"));
                     objective.getScore(bufferedNametag.getPlayer()).setScore((int) Math.floor(bufferedNametag.getPlayer().getHealth()));
+                    isHealth = true;
                 }
 
                 if (!bufferedNametag.isShowHealth() && scoreboard.getObjective(DisplaySlot.BELOW_NAME) != null) {
@@ -97,10 +107,33 @@ public class NametagThread extends Thread {
                 }
 
                 if (bufferedNametag.isShowHealth() && scoreboard.getObjective(DisplaySlot.BELOW_NAME) != null) {
-                    Objective objective = scoreboard.getObjective("showhealth");
-                    objective.getScore(bufferedNametag.getPlayer()).setScore((int) Math.floor(bufferedNametag.getPlayer().getHealth()));
+                    isHealth = true;
+                    Objective objective = scoreboard.getObjective(bufferedNametag.getGroupName());
+                    if (objective.getScore(bufferedNametag.getPlayer()) == null || objective.getScore(bufferedNametag.getPlayer()).getScore() == 0) {
+                        objective.getScore(bufferedNametag.getPlayer()).setScore((int) Math.floor(bufferedNametag.getPlayer().getHealth()));
+                    }
                 }
             }
+
+            for (String newGroupName : board.getBufferedTeams()) {
+                Team team = scoreboard.getTeam(newGroupName);
+
+                if (team == null) {
+                    continue;
+                }
+
+                team.unregister();
+            }
+
+            if (!isHealth) {
+                Objective objective = scoreboard.getObjective("showhealth");
+                if (objective != null) {
+                    objective.unregister();
+                }
+            }
+
+            board.getBufferedTeams().clear();
+            board.getBufferedTeams().addAll(toReturn);
         }
     }
 }
