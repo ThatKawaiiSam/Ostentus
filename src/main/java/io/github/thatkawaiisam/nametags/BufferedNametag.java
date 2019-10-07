@@ -9,7 +9,7 @@ import org.bukkit.entity.Player;
 public class BufferedNametag {
 
     private String groupName, prefix, suffix;
-    private boolean showHealth = false, friendlyInvis = false;
+    private boolean friendlyInvis;
     private Player player;
 
 }

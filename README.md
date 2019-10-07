@@ -1,4 +1,4 @@
-Nametags
+#Nametags
 
 ```java
 new NametagHandler(HubPlugin.getProvidingPlugin(HubPlugin.class),

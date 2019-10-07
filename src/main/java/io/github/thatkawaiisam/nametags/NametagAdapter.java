@@ -8,4 +8,5 @@ public interface NametagAdapter {
 
     List<BufferedNametag> getPlate(Player player);
 
+    boolean showHealthBelowName(Player player);
 }
