@@ -42,7 +42,7 @@
     </dependencies>
 
     <build>
-        <finalName>Menus-${project.version}-${git.commit.id.abbrev}</finalName>
+        <finalName>Nametags-${project.version}-${git.commit.id.abbrev}</finalName>
         <defaultGoal>clean install</defaultGoal>
 
         <resources>
