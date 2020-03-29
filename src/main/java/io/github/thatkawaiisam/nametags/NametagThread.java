@@ -89,18 +89,24 @@ public class NametagThread extends Thread {
 
                 //Set Prefix
                 if (bufferedNametag.getPrefix() != null) {
-                    team.setPrefix(bufferedNametag.getPrefix());
+                    if (!bufferedNametag.getPrefix().equals(team.getPrefix())) {
+                        team.setPrefix(bufferedNametag.getPrefix());
+                    }
                 } else {
                     team.setPrefix(ChatColor.WHITE.toString());
                 }
                 //Set Suffix
                 if (bufferedNametag.getSuffix() != null) {
-                    team.setSuffix(bufferedNametag.getSuffix());
+                    if (!bufferedNametag.getSuffix().equals(team.getSuffix())) {
+                        team.setSuffix(bufferedNametag.getSuffix());
+                    }
                 } else {
                     team.setSuffix(ChatColor.WHITE.toString());
                 }
                 if (bufferedNametag.getPlayer() != null && bufferedNametag.getPlayer().isOnline()) {
-                    team.addEntry(bufferedNametag.getPlayer().getName());
+                    if (!team.hasEntry(bufferedNametag.getPlayer().getName())) {
+                        team.addEntry(bufferedNametag.getPlayer().getName());
+                    }
                     if (strings.containsKey(team.getName())) {
                         List<String> lol = strings.get(team.getName());
                         lol.add(bufferedNametag.getPlayer().getName());
