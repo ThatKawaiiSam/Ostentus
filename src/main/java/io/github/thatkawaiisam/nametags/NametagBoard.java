@@ -7,14 +7,12 @@ import org.bukkit.scoreboard.Scoreboard;
 
 import java.util.*;
 
-@Getter
 public class NametagBoard {
 
-    private final UUID uuid;
-    private Scoreboard scoreboard;
-    private Set<String> bufferedTeams = new HashSet<>();
-    private Map<String, List<String>> bufferedPlayers = new HashMap<>();
-    private NametagHandler handler;
+    @Getter private final UUID uuid;
+    @Getter private Set<String> bufferedTeams = new HashSet<>();
+    @Getter private Map<String, List<String>> bufferedPlayers = new HashMap<>();
+    @Getter private NametagHandler handler;
 
     public NametagBoard(Player player, NametagHandler handler) {
         this.uuid = player.getUniqueId();
@@ -23,15 +21,19 @@ public class NametagBoard {
     }
 
     private void setup(Player player) {
-        // Register new scoreboard if needed
-        if (getHandler().isHook() || !(player.getScoreboard() == Bukkit.getScoreboardManager().getMainScoreboard())) {
-            this.scoreboard = player.getScoreboard();
-        } else {
-            this.scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
-        }
+        Scoreboard scoreboard = getScoreboard();
 
         // Update scoreboard
-        player.setScoreboard(this.scoreboard);
+        player.setScoreboard(scoreboard);
+    }
+
+    public Scoreboard getScoreboard() {
+        Player player = Bukkit.getPlayer(getUuid());
+        if (getHandler().isHook() || player.getScoreboard() != Bukkit.getScoreboardManager().getMainScoreboard()) {
+            return player.getScoreboard();
+        } else {
+            return Bukkit.getScoreboardManager().getNewScoreboard();
+        }
     }
 
     private void cleanup() {
