@@ -12,6 +12,11 @@ public class NametagListeners implements Listener {
 
     private NametagHandler handler;
 
+    /**
+     * Nametag Listeners.
+     *
+     * @param handler instance.
+     */
     public NametagListeners(NametagHandler handler) {
         this.handler = handler;
     }
@@ -23,6 +28,13 @@ public class NametagListeners implements Listener {
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
+        NametagBoard board = getHandler().getBoards().get(event.getPlayer().getUniqueId());
+
+        if (board == null) {
+            return;
+        }
+
+        board.cleanup();
         getHandler().getBoards().remove(event.getPlayer().getUniqueId());
         event.getPlayer().setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
     }

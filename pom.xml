@@ -7,6 +7,7 @@
     <groupId>io.github.thatkawaiisam</groupId>
     <artifactId>nametags</artifactId>
     <packaging>jar</packaging>
+    <name>Nametags</name>
     <version>1.0-SNAPSHOT</version>
 
     <repositories>
@@ -32,17 +33,10 @@
             <version>1.16.16</version>
             <scope>provided</scope>
         </dependency>
-        <!-- Utils -->
-        <dependency>
-            <groupId>io.github.thatkawaiisam</groupId>
-            <artifactId>utils</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
     </dependencies>
 
     <build>
-        <finalName>Nametags-${project.version}-${git.commit.id.abbrev}</finalName>
+        <finalName>Nametags-${project.version}</finalName>
         <defaultGoal>clean install</defaultGoal>
 
         <resources>
@@ -82,5 +76,13 @@
             </plugin>
         </plugins>
     </build>
+
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub ThatKawaiiSam Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/ThatKawaiiSam/Nametags</url>
+        </repository>
+    </distributionManagement>
 
 </project>
