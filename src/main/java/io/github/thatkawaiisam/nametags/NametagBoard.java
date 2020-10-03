@@ -154,6 +154,9 @@ public class NametagBoard {
                 continue;
             }
 
+            for (String entry : team.getEntries()) {
+                team.removeEntry(entry);
+            }
             team.unregister();
         }
 
