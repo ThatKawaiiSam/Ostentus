@@ -11,6 +11,7 @@ import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Getter
 public class NametagBoard {
@@ -20,7 +21,7 @@ public class NametagBoard {
     private NametagHandler handler;
 
     private Set<String> bufferedTeams = new HashSet<>();
-    private Map<String, List<String>> bufferedPlayers = new HashMap<>();
+    private Map<String, List<String>> bufferedPlayers = new ConcurrentHashMap<>();
 
     /**
      * Nametag Board.

@@ -6,6 +6,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scoreboard.Team;
 
 import java.util.Map;
 import java.util.UUID;
@@ -82,7 +83,9 @@ public class NametagHandler {
             }
 
             getBoards().remove(uuid);
-            player.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
+            if (!isHook()) {
+                player.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
+            }
         }
     }
 
