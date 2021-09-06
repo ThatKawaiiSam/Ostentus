@@ -1,10 +1,10 @@
-package io.github.thatkawaiisam.nametags;
+package io.github.thatkawaiisam.ostentus;
 
 import org.bukkit.entity.Player;
 
 import java.util.List;
 
-public interface NametagAdapter {
+public interface OstentusAdapter {
 
     /**
      * Get all of the nametags of other players.

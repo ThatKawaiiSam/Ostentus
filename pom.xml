@@ -5,9 +5,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.github.thatkawaiisam</groupId>
-    <artifactId>nametags</artifactId>
+    <artifactId>ostentus</artifactId>
     <packaging>jar</packaging>
-    <name>Nametags</name>
+    <name>Ostentus</name>
     <version>1.0-SNAPSHOT</version>
 
     <repositories>
@@ -36,7 +36,7 @@
     </dependencies>
 
     <build>
-        <finalName>Nametags-${project.version}</finalName>
+        <finalName>Ostentus-${project.version}</finalName>
         <defaultGoal>clean install</defaultGoal>
 
         <resources>
@@ -81,7 +81,7 @@
         <repository>
             <id>github</id>
             <name>GitHub ThatKawaiiSam Apache Maven Packages</name>
-            <url>https://maven.pkg.github.com/ThatKawaiiSam/Nametags</url>
+            <url>https://maven.pkg.github.com/ThatKawaiiSam/Ostentus</url>
         </repository>
     </distributionManagement>
 

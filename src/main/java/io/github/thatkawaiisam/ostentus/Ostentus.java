@@ -1,4 +1,4 @@
-package io.github.thatkawaiisam.nametags;
+package io.github.thatkawaiisam.ostentus;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -6,34 +6,33 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scoreboard.Team;
 
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Getter @Setter
-public class NametagHandler {
+public class Ostentus {
 
     private JavaPlugin plugin;
 
-    private NametagAdapter adapter;
-    private NametagThread thread;
-    private NametagListeners listeners;
+    private OstentusAdapter adapter;
+    private OstentusThread thread;
+    private OstentusListeners listeners;
 
-    private Map<UUID, NametagBoard> boards;
+    private Map<UUID, OstentusBoard> boards;
     private long ticks = 2;
     private boolean hook = false;
 
     /**
-     * Nametag Handler.
+     * Ostentus Handler.
      *
      * @param plugin instance.
      * @param adapter to display nametags.
      */
-    public NametagHandler(JavaPlugin plugin, NametagAdapter adapter) {
+    public Ostentus(JavaPlugin plugin, OstentusAdapter adapter) {
         if (plugin == null) {
-            throw new RuntimeException("Nametag Handler can not be instantiated without a plugin instance!");
+            throw new RuntimeException("Ostentus can not be instantiated without a plugin instance!");
         }
 
         this.plugin = plugin;
@@ -44,22 +43,22 @@ public class NametagHandler {
     }
 
     /**
-     * Setup Library.
+     * Setup Ostentus.
      */
     public void setup() {
         // Register Events.
-        this.listeners = new NametagListeners(this);
+        this.listeners = new OstentusListeners(this);
         this.plugin.getServer().getPluginManager().registerEvents(this.listeners, this.plugin);
 
         for (Player player : Bukkit.getOnlinePlayers()) {
-            getBoards().putIfAbsent(player.getUniqueId(), new NametagBoard(player, this));
+            this.boards.putIfAbsent(player.getUniqueId(), new OstentusBoard(player, this));
         }
 
-        this.thread = new NametagThread(this);
+        this.thread = new OstentusThread(this);
     }
 
     /**
-     * Cleanup Library.
+     * Cleanup Ostentus.
      */
     public void cleanup() {
         // Unregister Thread.
@@ -82,8 +81,8 @@ public class NametagHandler {
                 continue;
             }
 
-            getBoards().remove(uuid);
-            if (!isHook()) {
+            this.boards.remove(uuid);
+            if (!this.hook) {
                 player.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
             }
         }

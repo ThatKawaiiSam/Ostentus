@@ -1,4 +1,4 @@
-package io.github.thatkawaiisam.nametags;
+package io.github.thatkawaiisam.ostentus;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

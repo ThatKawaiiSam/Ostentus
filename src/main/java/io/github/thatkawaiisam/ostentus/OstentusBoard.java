@@ -1,4 +1,4 @@
-package io.github.thatkawaiisam.nametags;
+package io.github.thatkawaiisam.ostentus;
 
 import lombok.Getter;
 import org.apache.commons.lang.StringEscapeUtils;
@@ -14,11 +14,11 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Getter
-public class NametagBoard {
+public class OstentusBoard {
 
     private final UUID uuid;
 
-    private NametagHandler handler;
+    private Ostentus ostentus;
 
     private Set<String> bufferedTeams = new HashSet<>();
     private Map<String, List<String>> bufferedPlayers = new ConcurrentHashMap<>();
@@ -27,11 +27,11 @@ public class NametagBoard {
      * Nametag Board.
      *
      * @param player that board belongs to.
-     * @param handler instance.
+     * @param ostentus instance.
      */
-    public NametagBoard(Player player, NametagHandler handler) {
+    public OstentusBoard(Player player, Ostentus ostentus) {
         this.uuid = player.getUniqueId();
-        this.handler = handler;
+        this.ostentus = ostentus;
         this.setup(player);
     }
 
@@ -41,7 +41,7 @@ public class NametagBoard {
      * @param player that board belongs to.
      */
     private void setup(Player player) {
-        Scoreboard scoreboard = getScoreboard();
+        Scoreboard scoreboard = this.getScoreboard();
 
         // Update Bukkit scoreboard.
         player.setScoreboard(scoreboard);
@@ -53,8 +53,8 @@ public class NametagBoard {
      * @return existing scoreboard if in hook, or create new one.
      */
     public Scoreboard getScoreboard() {
-        Player player = Bukkit.getPlayer(getUuid());
-        if (getHandler().isHook() || player.getScoreboard() != Bukkit.getScoreboardManager().getMainScoreboard()) {
+        Player player = Bukkit.getPlayer(this.uuid);
+        if (this.ostentus.isHook() || player.getScoreboard() != Bukkit.getScoreboardManager().getMainScoreboard()) {
             return player.getScoreboard();
         } else {
             return Bukkit.getScoreboardManager().getNewScoreboard();
@@ -68,7 +68,7 @@ public class NametagBoard {
      * @param scoreboard of player.
      */
     private void updateHealthBelow(Player player, Scoreboard scoreboard) {
-        if (this.handler.getAdapter().showHealthBelowName(player)) {
+        if (this.ostentus.getAdapter().showHealthBelowName(player)) {
             if (scoreboard.getObjective(DisplaySlot.BELOW_NAME) == null) {
                 Objective objective = scoreboard.registerNewObjective("showhealth", "health");
                 objective.setDisplaySlot(DisplaySlot.BELOW_NAME);
@@ -110,7 +110,7 @@ public class NametagBoard {
      * @param scoreboard of player.
      */
     private void updateNametags(Player player, Scoreboard scoreboard) {
-        List<BufferedNametag> nametags = this.handler.getAdapter().getPlate(player);
+        List<BufferedNametag> nametags = this.ostentus.getAdapter().getPlate(player);
 
         if (nametags == null) {
             return;
@@ -197,8 +197,8 @@ public class NametagBoard {
      * Cleanup Board.
      */
     public void cleanup() {
-        bufferedPlayers.clear();
-        bufferedTeams.clear();
+        this.bufferedPlayers.clear();
+        this.bufferedTeams.clear();
     }
 
 }
