@@ -1,4 +1,4 @@
-package io.github.thatkawaiisam.nametags;
+package io.github.thatkawaiisam.ostentus;
 
 import lombok.Getter;
 import org.bukkit.Bukkit;
@@ -8,34 +8,34 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 @Getter
-public class NametagListeners implements Listener {
+public class OstentusListeners implements Listener {
 
-    private NametagHandler handler;
+    private Ostentus ostentus;
 
     /**
      * Nametag Listeners.
      *
-     * @param handler instance.
+     * @param ostentus instance.
      */
-    public NametagListeners(NametagHandler handler) {
-        this.handler = handler;
+    public OstentusListeners(Ostentus ostentus) {
+        this.ostentus = ostentus;
     }
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
-        getHandler().getBoards().putIfAbsent(event.getPlayer().getUniqueId(), new NametagBoard(event.getPlayer(), getHandler()));
+        this.ostentus.getBoards().putIfAbsent(event.getPlayer().getUniqueId(), new OstentusBoard(event.getPlayer(), this.ostentus));
     }
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
-        NametagBoard board = getHandler().getBoards().get(event.getPlayer().getUniqueId());
+        OstentusBoard board = this.ostentus.getBoards().get(event.getPlayer().getUniqueId());
 
         if (board == null) {
             return;
         }
 
         board.cleanup();
-        getHandler().getBoards().remove(event.getPlayer().getUniqueId());
+        this.ostentus.getBoards().remove(event.getPlayer().getUniqueId());
         event.getPlayer().setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
     }
 
